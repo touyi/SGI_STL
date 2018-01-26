@@ -34,7 +34,8 @@ TestResult.xml
 [Rr]eleasePS/
 dlldata.c
 
-
+*.db
+*.opendb
 *_i.c
 *_p.c
 *_i.h
