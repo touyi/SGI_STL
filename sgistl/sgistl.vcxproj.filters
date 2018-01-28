@@ -21,6 +21,9 @@
     <ClInclude Include="Dym_alloc.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="TDequene.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Default_alloc.cpp">
@@ -30,6 +33,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Dym_alloc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TDequene.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

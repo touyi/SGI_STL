@@ -34,3 +34,14 @@ public:
 
 };
 
+template<typename T>
+void construct(void* p, const T& value)
+{
+	new (p) T(value);
+}
+template<typename T>
+void destory(T* ptr)
+{
+	ptr->~T();
+}
+

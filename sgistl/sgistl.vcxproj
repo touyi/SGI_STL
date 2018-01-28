@@ -112,10 +112,12 @@
   <ItemGroup>
     <ClInclude Include="Default_alloc.h" />
     <ClInclude Include="Dym_alloc.h" />
+    <ClInclude Include="TDequene.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Default_alloc.cpp" />
     <ClCompile Include="Dym_alloc.cpp" />
+    <ClCompile Include="TDequene.cpp" />
     <ClCompile Include="源.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
