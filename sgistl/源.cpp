@@ -6,11 +6,14 @@ using std::endl;
 int main()
 {
 	TDequene<int> que;
-	que.push_back(123);
-	
-	que.push_back(123);
-	que.pop_front();
-	que.push_front(2);
+	for (int i = 0; i < 1000; i++)
+	{
+		que.push_back(i);
+	}
+	for (int i = 0; i < 500; i++)
+	{
+		que.pop_back();
+	}
 	for (auto i = que.begin(); i != que.end(); i++)
 	{
 		cout << *i << endl;

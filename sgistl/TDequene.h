@@ -8,6 +8,25 @@ void uninitialized_fill(Iter start, Iter end, T& value) {
 		new (&*i) T(value);
 	}
 }
+
+template<typename Iter>
+void copy(Iter oStart, Iter oEnd, Iter start)
+{
+	for (Iter i = oStart; i != oEnd; i++, start++)
+	{
+		*start = *i;
+	}
+}
+
+template<typename Iter>
+void copy_backward(Iter oStart, Iter oEnd, Iter start)
+{
+	
+	for (size_t i = oEnd - oStart-1;i>=0;i--)
+	{
+		*(start + i) = *(oStart + i);
+	}
+}
 template<typename T>
 struct Dequene_iterator {
 	typedef Dequene_iterator<T> iterator;
@@ -183,15 +202,25 @@ public:
 	void pop_back() {
 		if (!empty())
 		{
-			destory(finish.cur - 1);
 			finish--;
+			destory(finish.cur);
+			if (finish.cur == finish.last-1)
+			{
+				alloc::deallocate(*(finish.node+1), sizeof(T)*bufferSize());
+			}
+			
 		}
 	}
 	void pop_front() {
 		if (!empty())
 		{
 			destory(start.cur);
+			if (start.cur == start.last - 1)
+			{
+				alloc::deallocate(*start.node, sizeof(T)*bufferSize());
+			}
 			start++;
+			
 		}
 	}
 public:
@@ -206,6 +235,8 @@ public:
 	void creatMapAndNode(size_t n);
 	void check_map_at_back();
 	void check_map_at_front();
+	void rellocateMap(bool isfront,size_t need_node = 2);
+	pointer creadNode();
 };
 
 template<typename T>
@@ -221,13 +252,15 @@ void TDequene<T>::creatMapAndNode(size_t n)
 	size_t need_size = n / bufferSize() + 1;
 	map_size = max(need_size + 2, 8);
 	_map = static_cast<pointer*>(alloc::allocate(map_size * sizeof(pointer)));
+	size_t id = (map_size - need_size) / 2;
+	map_pointer new_start = _map + id;
 
-	for (int i = 0; i < map_size; i++)
+	for (size_t i = 0;i<need_size;new_start++,i++)
 	{
-		*(_map + i) = (T*)alloc::allocate(bufferSize() * sizeof(T));
+		*new_start = (T*)alloc::allocate(bufferSize() * sizeof(T));
 	}
 
-	size_t id = (map_size - need_size) / 2;
+	
 	start.setNewNode(_map + id);
 	start.cur = start.first;
 	finish = start + n;
@@ -236,13 +269,19 @@ void TDequene<T>::creatMapAndNode(size_t n)
 template<typename T>
 void TDequene<T>::check_map_at_back()
 {
-
+	if (_map + map_size <= finish.node + 1)
+	{
+		rellocateMap(false);
+	}
 }
 
 template<typename T>
 void TDequene<T>::check_map_at_front()
 {
-
+	if (_map >= start.node)
+	{
+		rellocateMap(true);
+	}
 }
 
 template<typename T>
@@ -276,9 +315,59 @@ void TDequene<T>::push_front(const value_type & value)
 template<typename T>
 void TDequene<T>::push_back_aux(const value_type & value)
 {
+	check_map_at_back();
+	*(finish.node + 1) = creadNode();
+	construct(finish.cur, value);
+	finish++;
 }
 
 template<typename T>
 void TDequene<T>::push_front_aux(const value_type & value)
 {
+	check_map_at_front();
+	*(start.node - 1) = creadNode();
+	start--;
+	construct(start.cur, value);
+}
+
+template<typename T>
+void TDequene<T>::rellocateMap(bool isfront, size_t need_node)
+{
+	size_t old_num_node = finish.node - start.node + 1;
+	size_t new_num_node = old_num_node + need_node;
+
+	map_pointer new_start;
+	if (new_num_node * 2 <= map_size)
+	{
+		new_start = _map + (map_size - new_num_node) / 2 + (isfront ? need_node : 0);
+		if (new_start < start.node)
+		{
+			copy(start.node, finish.node + 1, new_start);
+		}
+		else
+		{
+			copy_backward(start.node, finish.node + 1, new_start);
+		}
+	}
+	else {
+		size_t new_map_size = map_size + max(map_size, need_node) + 2;
+
+		map_pointer new_map = static_cast<map_pointer>(alloc::allocate(new_map_size * sizeof(pointer)));
+
+		new_start = new_map + (new_map_size - new_num_node) / 2 + (isfront ? need_node : 0);
+		copy(start.node, finish.node + 1, new_start);
+		alloc::deallocate(_map, map_size * sizeof(pointer));
+		map_size = new_map_size;
+		_map = new_map;
+		
+	}
+	start.setNewNode(new_start);
+	finish.setNewNode(new_start + old_num_node - 1);
+}
+
+
+template<typename T>
+typename TDequene<T>::pointer TDequene<T>::creadNode()
+{
+	return (T*)alloc::allocate(bufferSize()*sizeof(T));
 }
